@@ -1,4 +1,14 @@
 spring:
   application:
     name: chat
-    
+  ai:
+    openai:
+      # 환경변수 값
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        # 실제 사용할 대화형 AI의 모델명
+        model: openai/gpt-4.1-nano
+        # GitHub Models 서버로 요청을 보냄
+        base-url: https://models.github.ai/inference
+        # 세부 API 경로
+        completions-path: /chat/completions
