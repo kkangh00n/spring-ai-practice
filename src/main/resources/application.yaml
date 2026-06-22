@@ -12,3 +12,10 @@ spring:
         base-url: https://models.github.ai/inference
         # 세부 API 경로
         completions-path: /chat/completions
+    #[2] Ollama 설정
+    ollama:
+      init:
+        pull-model-strategy: when_missing
+      chat:
+        # hugging face의 모델명 입력
+        model: hf.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF
