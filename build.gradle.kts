@@ -26,7 +26,8 @@ dependencies {
 	implementation("org.springframework.ai:spring-ai-starter-model-openai")
 //	implementation("org.springframework.ai:spring-ai-starter-model-ollama")
 	implementation("tools.jackson.module:jackson-module-kotlin")
-	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
