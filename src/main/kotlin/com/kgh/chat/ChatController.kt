@@ -57,6 +57,11 @@ class ChatController(
         return chatService.stream(prompt, promptBody.conversationId)
     }
 
+    @PostMapping(value = ["/cs"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun cs(@RequestBody promptBody: @Valid PromptBody): CsEvaluation? {
+        return chatService.csEvaluation(createPrompt(promptBody), promptBody.conversationId)
+    }
+
     private fun createPrompt(promptBody: PromptBody): Prompt {
         // 1. 메시지들을 차곡차곡 담을 빈 List를 생성
         val messages: MutableList<Message> = ArrayList()

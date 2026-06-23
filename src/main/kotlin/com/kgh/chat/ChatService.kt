@@ -44,4 +44,25 @@ class ChatService(
             }
     }
 
+    fun csEvaluation(prompt: Prompt, conversationId: String): CsEvaluation? {
+        return prepareRequest(prompt, conversationId).call()
+            .entity(CsEvaluation::class.java)
+    }
+
 }
+
+// 1. 긴급도, 문의 카테고리 Enum 정의
+enum class Urgency {
+    LOW, NORMAL, HIGH, URGENT
+}
+
+enum class Category {
+    REFUND, SHIPPING, DEFECT, INQUIRY
+}
+
+// 2. 응답 레코드 정의
+data class CsEvaluation(
+    val category: Category?,
+    val urgency: Urgency?,
+    val keywords: MutableList<String?>? // 예: ["배송지연", "환불요청", "파손"]
+)
