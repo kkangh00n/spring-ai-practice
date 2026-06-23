@@ -5,6 +5,7 @@ import org.springframework.ai.chat.client.ChatClient.AdvisorSpec
 import org.springframework.ai.chat.client.ChatClient.ChatClientRequestSpec
 import org.springframework.ai.chat.client.advisor.api.Advisor
 import org.springframework.ai.chat.memory.ChatMemory
+import org.springframework.ai.chat.model.ChatResponse
 import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -23,6 +24,12 @@ class ChatService(
         return prepareRequest(prompt, conversationId)
             .stream()
             .content()
+    }
+
+    fun call(prompt: Prompt, conversationId: String): ChatResponse? {
+        return prepareRequest(prompt, conversationId)
+            .call()
+            .chatResponse()
     }
 
 
