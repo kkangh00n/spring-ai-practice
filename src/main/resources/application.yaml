@@ -1,6 +1,7 @@
 spring:
   application:
     name: chat
+    cli: true
   ai:
     openai:
       # 환경변수 값
