@@ -9,8 +9,12 @@ import org.springframework.ai.document.DocumentWriter
 import org.springframework.ai.model.transformer.KeywordMetadataEnricher
 import org.springframework.ai.reader.tika.TikaDocumentReader
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
@@ -66,6 +70,43 @@ class RagConfig {
                 println("JSON 변환 중 에러가 발생했습니다: " + e.message)
             }
             println("======================================================")
+        }
+    }
+
+    @ConditionalOnProperty(prefix = "app.etl.pipeline", name = ["init"], havingValue = "true")
+    @Order(1) // 다른 실행 코드들보다 가장 먼저 파이프라인을 가동하라
+    @Bean
+    fun initEtlPipeline(
+        documentReaders: MutableList<DocumentReader>,  // 1. Extract
+        textSplitter: DocumentTransformer,  // 2. Transform
+        keywordMetadataEnricher: DocumentTransformer,
+        documentWriters: MutableList<DocumentWriter> // 3. Load(콘솔 출력기, VectorDB 등)
+    ): ApplicationRunner {
+
+        return ApplicationRunner { args: ApplicationArguments? ->
+            println("[System] ETL 파이프라인 가동 시작")
+
+            // 1. 등록된 모든 파일 리더기(Reader)들을 하나씩 꺼내서 실행
+            for (reader in documentReaders) {
+
+                // 1. Extract 원본 파일에서 거대한 텍스트 덩어리를 읽어오기
+                val rawDocuments = reader.get()
+                println("[Extract] 파일 읽기 완료")
+
+                // 2. Transform 읽어온 문서를 AI가 소화하기 좋게 조각조각(Chunk) 자르기
+                var chunkedDocuments = textSplitter.apply(rawDocuments)
+                println("[Transform] 문서 분할 완료")
+
+                // 키워드 추출기 이어서 적용
+                chunkedDocuments = keywordMetadataEnricher.apply(chunkedDocuments)
+
+                // 3. Load  가공된 문서 조각들을 준비된 모든 저장소에 집어넣음
+                for (writer in documentWriters) {
+                    writer.accept(chunkedDocuments)
+                }
+                println("[Load] 저장소 적재 완료")
+            }
+            println("[System] ETL 파이프라인 적재 종료")
         }
     }
 

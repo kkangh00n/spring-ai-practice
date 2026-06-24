@@ -31,3 +31,6 @@ logging:
 app:
   rag:
     documents-location-pattern: classpath:spring-ai-llm.pdf
+  etl:
+    pipeline:
+      init: true
