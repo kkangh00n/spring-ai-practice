@@ -30,7 +30,7 @@ logging:
 
 app:
   rag:
-    documents-location-pattern: classpath:spring-ai-llm.pdf
+    documents-location-pattern: classpath:spring-ai-llm2.pdf
   etl:
     pipeline:
       init: true
@@ -38,4 +38,4 @@ app:
     in-memory:
       enabled: true
   cli:
-    enabled: true
+    enabled: false
