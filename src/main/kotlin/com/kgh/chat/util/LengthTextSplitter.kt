@@ -1,4 +1,4 @@
-package com.kgh.chat
+package com.kgh.chat.util
 
 import org.springframework.ai.transformer.splitter.TextSplitter
 import org.springframework.util.StringUtils

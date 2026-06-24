@@ -1,6 +1,7 @@
-package com.kgh.chat
+package com.kgh.chat.embedded
 
 import ch.qos.logback.classic.LoggerContext
+import com.kgh.chat.rag.RagChatService
 import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor
@@ -23,8 +24,7 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.util.*
-
+import java.util.Scanner
 
 @Configuration
 class ChatConfig {
