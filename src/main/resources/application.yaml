@@ -24,3 +24,7 @@ spring:
 logging:
   level:
     org.springframework.ai.chat.client.advisor: DEBUG
+
+app:
+  rag:
+    documents-location-pattern: classpath:spring-ai-llm.pdf
