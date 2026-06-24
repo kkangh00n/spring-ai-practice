@@ -20,6 +20,9 @@ spring:
       chat:
         # hugging face의 모델명 입력
         model: hf.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF
+      embedding:
+        options:
+          model: bge-m3
 
 logging:
   level:

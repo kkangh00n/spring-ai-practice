@@ -1,8 +1,11 @@
 package com.kgh.chat
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.ai.chat.model.ChatModel
+import org.springframework.ai.document.Document
 import org.springframework.ai.document.DocumentReader
 import org.springframework.ai.document.DocumentTransformer
+import org.springframework.ai.document.DocumentWriter
 import org.springframework.ai.model.transformer.KeywordMetadataEnricher
 import org.springframework.ai.reader.tika.TikaDocumentReader
 import org.springframework.beans.factory.annotation.Value
@@ -10,6 +13,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
+
 
 @Configuration
 class RagConfig {
@@ -43,4 +47,26 @@ class RagConfig {
     fun keywordMetadataEnricher(chatModel: ChatModel): KeywordMetadataEnricher {
         return KeywordMetadataEnricher(chatModel, 4)
     }
+
+    @Bean
+    fun jsonConsoleDocumentWriter(objectMapper: ObjectMapper): DocumentWriter {
+        // 앞 단계에서 가공되어 넘어온 문서 조각 리스트(documents)를 받아서 로직실행
+        return DocumentWriter { documents: MutableList<Document> ->
+
+            // 1. 현재 들어온 총 문서 조각(Chunk)의 개수가 몇 개인지 콘솔에 명확하게 표기
+            println("======= 저장할 문서 조각(Chunk) 개수: " + documents.size + " ========")
+            try {
+                // 들여쓰기와 줄바꿈 적용된 예쁜 JSON 문자열로 출력
+                val jsonString: String? =
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(documents)
+
+                println(jsonString)
+
+            } catch (e: Exception) {
+                println("JSON 변환 중 에러가 발생했습니다: " + e.message)
+            }
+            println("======================================================")
+        }
+    }
+
 }
