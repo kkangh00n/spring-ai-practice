@@ -1,5 +1,6 @@
-package com.kgh.chat
+package com.kgh.chat.rag
 
+import com.kgh.chat.util.LengthTextSplitter
 import tools.jackson.databind.ObjectMapper
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.model.ChatModel

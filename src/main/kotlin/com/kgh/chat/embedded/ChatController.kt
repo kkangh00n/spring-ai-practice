@@ -1,4 +1,4 @@
-package com.kgh.chat
+package com.kgh.chat.embedded
 
 import jakarta.validation.Valid
 import org.springframework.ai.chat.client.ChatClient

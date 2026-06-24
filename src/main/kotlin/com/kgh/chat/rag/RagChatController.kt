@@ -1,4 +1,4 @@
-package com.kgh.chat
+package com.kgh.chat.rag
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotEmpty

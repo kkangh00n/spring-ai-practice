@@ -1,4 +1,4 @@
-package com.kgh.chat
+package com.kgh.chat.embedded
 
 import ch.qos.logback.classic.LoggerContext
 import org.slf4j.LoggerFactory

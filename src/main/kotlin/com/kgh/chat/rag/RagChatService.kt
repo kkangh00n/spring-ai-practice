@@ -1,4 +1,4 @@
-package com.kgh.chat
+package com.kgh.chat.rag
 
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.ChatClient.AdvisorSpec
