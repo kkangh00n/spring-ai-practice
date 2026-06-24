@@ -1,13 +1,22 @@
 package com.kgh.chat
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.model.ChatModel
 import org.springframework.ai.document.Document
 import org.springframework.ai.document.DocumentReader
 import org.springframework.ai.document.DocumentTransformer
 import org.springframework.ai.document.DocumentWriter
+import org.springframework.ai.embedding.EmbeddingModel
 import org.springframework.ai.model.transformer.KeywordMetadataEnricher
+import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor
+import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter
+import org.springframework.ai.rag.preretrieval.query.expansion.MultiQueryExpander
+import org.springframework.ai.rag.preretrieval.query.transformation.TranslationQueryTransformer
+import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever
 import org.springframework.ai.reader.tika.TikaDocumentReader
+import org.springframework.ai.vectorstore.SimpleVectorStore
+import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -71,6 +80,56 @@ class RagConfig {
             }
             println("======================================================")
         }
+    }
+
+    @ConditionalOnProperty(
+        prefix = "app.vectorstore.in-memory",
+        name = ["enabled"],
+        havingValue = "true"
+    )
+    @Bean
+    fun vectorStore(embeddingModel: EmbeddingModel): VectorStore {
+        return SimpleVectorStore.builder(embeddingModel).build()
+    }
+
+    @Bean
+    fun retrievalArgumentationAdvisor(
+        vectorStore: VectorStore,
+        chatClientBuilder: ChatClient.Builder
+    ): RetrievalAugmentationAdvisor {
+        // 1. 문서검색기 도구
+        // Vector DB에서 유사도 30%(0.3) 이상인 문서를 최대 3개(topK) 찾아오도록 세팅
+        val documentRetriever = VectorStoreDocumentRetriever.builder()
+            .vectorStore(vectorStore)
+            .similarityThreshold(0.3)
+            .topK(3)
+            .build()
+
+        // 2. 프롬프트 결합기 도구
+        // 검색된 문서가 하나도 없더라도 에러를 내지말고 LLM에게 유연하게 넘기도록 세팅
+        val queryAugmenter = ContextualQueryAugmenter.builder()
+            .allowEmptyContext(true)
+            .build()
+
+
+        // 3. 쿼리 익스펜더
+        val queryExpander = MultiQueryExpander.builder()
+            .chatClientBuilder(chatClientBuilder)
+            .build()
+
+        // 4. 쿼리 트랜스포머
+        val queryTransformer = TranslationQueryTransformer.builder()
+            .chatClientBuilder(chatClientBuilder)
+            .targetLanguage("korean")
+            .build()
+
+        //5. 최종 합체
+        return RetrievalAugmentationAdvisor.builder()
+            .documentRetriever(documentRetriever)
+            .queryAugmenter(queryAugmenter) // ~~~ 다양한 도구들
+            .queryExpander(queryExpander)
+            .queryTransformers(queryTransformer)
+            .build()
     }
 
     @ConditionalOnProperty(prefix = "app.etl.pipeline", name = ["init"], havingValue = "true")
