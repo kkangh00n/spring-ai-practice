@@ -34,6 +34,8 @@ app:
   etl:
     pipeline:
       init: true
-  vertorstore:
+  vectorstore:
     in-memory:
       enabled: true
+  cli:
+    enabled: true
