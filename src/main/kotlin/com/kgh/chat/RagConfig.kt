@@ -1,6 +1,9 @@
 package com.kgh.chat
 
+import org.springframework.ai.chat.model.ChatModel
 import org.springframework.ai.document.DocumentReader
+import org.springframework.ai.document.DocumentTransformer
+import org.springframework.ai.model.transformer.KeywordMetadataEnricher
 import org.springframework.ai.reader.tika.TikaDocumentReader
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -29,5 +32,15 @@ class RagConfig {
 
         // 4. 리스트 반환
         return readers
+    }
+
+    @Bean
+    fun textSplitter(): DocumentTransformer {
+        return LengthTextSplitter(200, 100)
+    }
+
+    @Bean
+    fun keywordMetadataEnricher(chatModel: ChatModel): KeywordMetadataEnricher {
+        return KeywordMetadataEnricher(chatModel, 4)
     }
 }
