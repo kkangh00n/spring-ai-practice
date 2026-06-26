@@ -1,7 +1,6 @@
-package com.kgh.chat.embedded
+package com.kgh.chat.tool
 
 import ch.qos.logback.classic.LoggerContext
-import com.kgh.chat.rag.RagChatService
 import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor
@@ -24,20 +23,13 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import java.util.Scanner
 
-//@Configuration
-class ChatConfig {
+@Configuration
+@Profile("tool")
+class ToolChatConfig {
 
-    /**
-     * Advisor란?
-     * AI 모델과 주고받는 요청과 응답을 중간에서 가로채 데이터를 동적으로 수정, 확장, 차단할 수 있게 해주는 컴포넌트
-     * 스택 구조로 동작
-     * - 우선순위가 높은(Order 값이 작은) Advisor가 가장 먼저 요청을 가로채서 전처리함
-     * - 우선순위가 높은(Order 값이 작은) Advisor가 가장 마지막에 응답을 가로채서 후처리함
-     */
-
-    //1. 로깅 관련 어드바이저 구성 (우선순위 0)
     @Bean
     fun simpleLoggerAdvisor(): SimpleLoggerAdvisor {
         // builder().build() 패턴을 사용하여 로거 객체 생성
@@ -45,7 +37,6 @@ class ChatConfig {
             .build()
     }
 
-    //대화 히스토리를 저장하는 메모리
     @Bean
     fun chatMemory(): ChatMemory {
         return MessageWindowChatMemory.builder()
@@ -54,26 +45,20 @@ class ChatConfig {
             .build()
     }
 
-    //2. 우리가 짧은 질문만 던지더라도,
-    // 해당 Advisor가 대답을 가로채서 기존의 대화 기록(ChatMemory)을 끼워 넣은 다음, 최종 프롬프트를 AI에게 대신 전달해줌
     @Bean
     fun messageChatMemoryAdvisor(chatMemory: ChatMemory): MessageChatMemoryAdvisor {
         return MessageChatMemoryAdvisor.builder(chatMemory).build()
     }
 
 
-    /**
-     * 1. 새로운 CLI 설정
-     */
     @ConditionalOnProperty(prefix = "app.cli", name = ["enabled"], havingValue = "true")
-    @Bean // 스프링 부트 서버가 완전히 켜지기 전에 단 한번 자동으로 실행
+    @Bean
     fun cli(
-        ragChatService: RagChatService,
+        toolService: ToolService,
         @Value("\${spring.application.name}") applicationName: String?,
         @Value("\${app.cli.filter-expression:}") filterExpression: String?
     ): CommandLineRunner {
         return CommandLineRunner { _ ->
-            // 1. 스프링 기본 로그 끄기 (채팅에 방해되지 않도록)
             val context: LoggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
             context.getLogger("ROOT").detachAppender("CONSOLE")
 
@@ -86,7 +71,6 @@ class ChatConfig {
                     print("\nUSER: ")
                     val userMessage: String = scanner.nextLine()
 
-                    // 2. 대화 종료 조건 (무한 루프 탈출)
                     if (userMessage.equals("exit", ignoreCase = true) || userMessage.equals(
                             "quit",
                             ignoreCase = true
@@ -96,29 +80,22 @@ class ChatConfig {
                         break
                     }
 
-                    print("ASSISTANT: ")
+                    print("ASSISTANT TOOL: ")
 
-                    // 3.스트리밍 처리 (핵심 변경 포인트)
-                    // Flux(스트림)를 toIterable()로 바꾸면 일반적인 for-each 문으로 한 글자씩 꺼내 쓸 수 있음!
-                    val chatStream: Iterable<String?> = ragChatService.stream(
-                        Prompt(userMessage),
+                    val chatStream: Iterable<String?> = toolService.stream(
                         "cli",
-                        // filterExpression의 값이 있을때만 통과
-                        filterExpression?.takeIf { it.isNotBlank() }
+                        Prompt(userMessage)
                     ).toIterable()
 
                     for (token in chatStream) {
-                        print(token) // 한 글자씩 화면에 출력 (타이핑 효과)
+                        print(token)
                     }
-                    println() // AI 대답이 끝나면 줄바꿈 한 번
+                    println()
                 }
             }
         }
     }
 
-    /**
-     * 2. 후처리기
-     */
     @ConditionalOnProperty(prefix = "app.cli", name = ["enabled"], havingValue = "true")
     @Bean
     fun printDocumentsPostProcessor(): DocumentPostProcessor {
@@ -144,9 +121,6 @@ class ChatConfig {
         }
     }
 
-    /**
-     * 후처리기 결합
-     */
     @Bean
     fun retrievalAugmentationAdvisor(
         vectorStore: VectorStore,

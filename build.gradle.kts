@@ -23,8 +23,8 @@ extra["springAiVersion"] = "2.0.0"
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-//	implementation("org.springframework.ai:spring-ai-starter-model-openai")
-	implementation("org.springframework.ai:spring-ai-starter-model-ollama")
+	implementation("org.springframework.ai:spring-ai-starter-model-openai")
+//	implementation("org.springframework.ai:spring-ai-starter-model-ollama")
 	implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
     implementation("org.springframework.ai:spring-ai-vector-store:2.0.0-M6")
