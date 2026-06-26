@@ -33,6 +33,10 @@ dependencies {
     implementation ("org.springframework.ai:spring-ai-starter-vector-store-elasticsearch")
     implementation("org.springframework.ai:spring-ai-tika-document-reader:2.0.0-M6")
     implementation("org.springframework.ai:spring-ai-rag:2.0.0-M6")
+    implementation("org.springframework.ai:spring-ai-starter-mcp-client:2.0.0-M6")
+    compileOnly ("org.projectlombok:lombok")
+    annotationProcessor ("org.projectlombok:lombok")
+
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
